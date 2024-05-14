@@ -20,8 +20,10 @@ DevhelpPlugin::DevhelpPlugin() : m_hbox(Gtk::ORIENTATION_HORIZONTAL), m_vbox(Gtk
 	gtk_grid_attach (GTK_GRID (m_grid), m_sidebar, 0, 0, 1, 1);
 	
 	/*Convert booktree of gtk to gtkmm */		
-	m_book_tree = GTK_TREE_VIEW(dh_book_tree_new(dh_profile));
-	m_book_tree_convert = Glib::wrap(m_book_tree);
+	//m_book_tree = GTK_TREE_VIEW(dh_book_tree_new(dh_profile));
+	m_book_tree = dh_book_tree_new(dh_profile);
+	m_book_tree01 = GTK_TREE_VIEW(m_book_tree);
+	m_book_tree_convert = Glib::wrap(m_book_tree01);
 	
 	/*Convert GtkSearch of Gtk to Gtkmm*/
 	m_search = GTK_WIDGET(m_grid);
@@ -52,7 +54,8 @@ DevhelpPlugin::DevhelpPlugin() : m_hbox(Gtk::ORIENTATION_HORIZONTAL), m_vbox(Gtk
 	refTreeSelection = m_book_tree_convert->get_selection();
 	refTreeSelection->set_mode(Gtk::SelectionMode::SELECTION_SINGLE);
 	//refTreeSelection->signal_changed().connect(sigc::mem_fun(*this, &DevhelpPlugin::on_link_clicked));
-	m_book_tree_convert->DevhelpPlugin.signal_link_selected().connect( sigc::mem_fun(*this, &DevhelpPlugin::on_link_clicked) );
+	//m_book_tree_convert->DevhelpPlugin.signal_link_selected().connect( sigc::mem_fun(*this, &DevhelpPlugin::on_link_clicked) );
+	m_book_tree_convert->signal_cursor_changed().connect(sigc::bind(sigc::mem_fun(*this, &DevhelpPlugin::on_link_clicked), m_dhlink ));
 
 	/* Init Webkit Library*/
 	m_webview_main =  WEBKIT_WEB_VIEW( webkit_web_view_new() ); 
@@ -78,11 +81,11 @@ DevhelpPlugin::DevhelpPlugin() : m_hbox(Gtk::ORIENTATION_HORIZONTAL), m_vbox(Gtk
 	toolbar.insert(btn_zoom_in, -1);
 	toolbar.insert(btn_zoom_out, -1);
 		
-	m_vbox.pack_start(toolbar, false, true, 0);
+	m_vbox.pack_start(toolbar,false, true, 0);
 	m_vbox.pack_start(webview_sw, true, true, 0);
 	
 	
-	m_hbox.pack_start(m_sidebar_notebook, true, true, 0);
+	m_hbox.pack_start(m_sidebar_notebook, false, true, 0);
 	m_hbox.pack_start(m_vbox, true, true, 0);
 	
 	add(m_hbox);
@@ -95,20 +98,21 @@ DevhelpPlugin::~DevhelpPlugin()
 }
 
 
-void DevhelpPlugin::on_link_clicked()
+void DevhelpPlugin::on_link_clicked(DhLink* dhlink)
 {
-	DhLink *dhlink = dh_sidebar_get_selected_link(m_sidebarnew2);
+	dhlink = dh_book_tree_get_selected_link(m_book_tree);
 	const char *uri;
 	
 	uri = dh_link_get_uri(dhlink);
-	std::cout << *uri << std::endl;
+	//std::cout << uri << std::endl;
+	//std::cout << m_hbox.get_spacing() << std::endl;
 	webkit_web_view_load_uri(m_webview_main, uri);
 
 }
 
 
 
-
+/*
 Glib::SignalProxy<void()> DevhelpPlugin::signal_link_selected()
 {
   return Glib::SignalProxy<void() >(this, &BookTree_signal_cursor_changed_info);
@@ -122,3 +126,4 @@ static const Glib::SignalProxyInfo BookTree_signal_cursor_changed_info =
   (GCallback) &Glib::SignalProxyNormal::slot0_void_callback,
   (GCallback) &Glib::SignalProxyNormal::slot0_void_callback
 };
+*/

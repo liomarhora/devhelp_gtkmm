@@ -32,12 +32,14 @@ public:
 	
 protected:
 	//void on_link_clicked(const TreeModel::Path& path, TreeViewColumn* column);
-	void on_link_clicked();
+	void on_link_clicked(DhLink*);
 
 	Glib::SignalProxy<void()> signal_link_selected();
 
 	Glib::RefPtr<TreeSelection> refTreeSelection;
-	GtkTreeView*		m_book_tree;						/* "Contents" in the sidebar */
+	DhBookTree*		m_book_tree;						/* "Contents" in the sidebar */
+	GtkTreeView*	m_book_tree01;						/* "Contents" in the sidebar */
+	DhLink* 		m_dhlink;
     GtkWidget*		m_grid;								/* "grid" in the sidebar */
     GtkWidget*		m_sidebar;							/* "DH_Sidebar" in the sidebar */
     GtkWidget*		m_search;							/* "Search" in the sidebar */
